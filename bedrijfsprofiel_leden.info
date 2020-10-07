@@ -1,0 +1,11 @@
+; $Id$
+
+name = bedrijfsprofiel_leden
+description = Bedrijfsprofiel leden
+package = Blauwe Cluster
+core = 7.x
+
+files[] = bedrijfsprofiel_leden.module
+files[] = bedrijfsprofiel_leden.css
+files[] = bedrijfsprofiel_leden.inc
+files[] = bedrijfsprofiel_leden_details.inc

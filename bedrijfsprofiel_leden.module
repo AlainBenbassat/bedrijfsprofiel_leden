@@ -1,0 +1,51 @@
+<?php
+
+function bedrijfsprofiel_leden_menu() {
+	$items = [];
+
+	// list of members
+	$items['bedrijfsprofiel_leden'] = [
+		'title' => 'Bedrijfsprofiel leden',
+		'page callback' => 'bedrijfsprofiel_leden_page',
+		'access arguments' => ['access content'],
+		'type' => MENU_CALLBACK,
+	];
+
+	// member details
+  $items['bedrijfsprofiel_leden_details'] = [
+    'title' => 'Bedrijfsprofiel',
+    'page callback' => 'bedrijfsprofiel_leden_details_page',
+    'access arguments' => ['access content'],
+    'type' => MENU_CALLBACK,
+  ];
+
+	return $items;
+}
+
+function bedrijfsprofiel_leden_page() {
+	// get the path of the current module and add the css
+	$path = drupal_get_path('module', 'bedrijfsprofiel_leden_page');
+	drupal_add_css($path . '/bedrijfsprofiel_leden_page.css', ['group' => CSS_DEFAULT, 'type' => 'file']);
+
+	// return the page
+  $p = new BedrijfsProfielLeden();
+	return $p->getPage();
+}
+
+function bedrijfsprofiel_leden_details_page() {
+  // get the path of the current module and add the css
+  $path = drupal_get_path('module', 'bedrijfsprofiel_leden_page');
+  drupal_add_css($path . '/bedrijfsprofiel_leden_page.css', ['group' => CSS_DEFAULT, 'type' => 'file']);
+
+  // get the id
+  if (isset($_GET['id']) && filter_var($_GET['id'], FILTER_VALIDATE_INT)) {
+    // return the member details
+    $p = new BedrijfsProfielLedenDetails($_GET['id']);
+    $html = $p->getPage();
+  }
+  else {
+    $html = '<p>Geen info</p>';
+  }
+
+  return $html;
+}

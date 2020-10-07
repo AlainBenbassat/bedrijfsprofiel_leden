@@ -476,7 +476,7 @@ class BedrijfsProfielLedenDetails {
       left outer join
         civicrm_contact org on org.id = r.contact_id_b
       where
-        cc.contact_id = 6
+        cc.contact_id = %1
       group by
         c.subject
         , ct.title

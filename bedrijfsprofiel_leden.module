@@ -7,7 +7,7 @@ function bedrijfsprofiel_leden_menu() {
 	$items['bedrijfsprofiel_leden'] = [
 		'title' => 'Bedrijfsprofiel leden',
 		'page callback' => 'bedrijfsprofiel_leden_page',
-		'access arguments' => ['access content'],
+		'access arguments' => ['access CiviCRM'],
 		'type' => MENU_CALLBACK,
 	];
 
@@ -15,7 +15,7 @@ function bedrijfsprofiel_leden_menu() {
   $items['bedrijfsprofiel_leden_details'] = [
     'title' => 'Bedrijfsprofiel',
     'page callback' => 'bedrijfsprofiel_leden_details_page',
-    'access arguments' => ['access content'],
+    'access arguments' => ['access CiviCRM'],
     'type' => MENU_CALLBACK,
   ];
 

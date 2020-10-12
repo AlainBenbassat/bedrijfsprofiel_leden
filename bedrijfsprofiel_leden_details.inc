@@ -42,19 +42,17 @@ class BedrijfsProfielLedenDetails {
     $html .= $this->Interessedomeinen();
 
     $html .= $this->formatSectionTitle('Rol in de waardeketen');
-    $html .= $this->formatSectionInfo('IK HEB ALLE TAGS GENOMEN ONDER "ROL". UITLEG ZOU JE IN BESCHRIJVING VAN DE TAG KUNNEN STOPPEN.');
     $html .= $this->Rollen();
 
+    $html .= $this->formatSectionTitle('Betrokkenheid in samenwerkingsinitiatieven');
+    $html .= $this->Samenwerkingen();
+
     $html .= $this->formatSectionTitle('Deelname aan evenementen van de Blauwe Cluster');
-    $html .= $this->formatSectionInfo('MOEILIJK OM EX-MEDEWERKERS TE TONEN: KAN ENKEL ALS WE ALTIJD EEN START EN EINDDATUM HEBBEN IN DE MEDEWERKER-VAN RELATIE.<br>IK TOON HIER ENKEL HUIDIGE MEDEWERKERS. HOPELIJK IS DAT VOLDOENDE.');
     $html .= $this->Deelnames();
 
     $html .= $this->formatSectionTitle('Telefoongesprekken/meetings');
     $html .= $this->formatSectionInfo('KAN ENKEL GETOOND WORDEN ALS HET BEDRIJF OOK INGEVULD IS IN HET VELD "MET CONTACT" VAN DE ACTIVITEIT');
     $html .= $this->Telefoongesprekken();
-
-    $html .= $this->formatSectionTitle('Betrokkenheid in samenwerkingsinitiatieven');
-    $html .= $this->Samenwerkingen();
 
     $html .= $this->formatSectionTitle('Privacy');
     $html .= $this->formatSectionInfo('De Blauwe Cluster vzw conformeert aan de nieuwe Algemene Verordening Gegevensbescherming. Je hebt een wettelijk recht om toegang tot, correctie en verwijdering van je persoonlijke gegevens te vragen. Je hebt ook het recht om de verwerking van je persoonlijke informatie te beperken.');
@@ -88,15 +86,16 @@ class BedrijfsProfielLedenDetails {
         p.phone,
         w.url website,
         e.email,
-        'GEEN VELD IN CIVI?' aantal_werknemers,
-        'GEEN VELD IN CIVI?' jaarlijkse_omzet,
+        '' aantal_werknemers,
+        '' jaarlijkse_omzet,
+        '' balanstotaal,
         o.percentage_omzet_blauw__31 percentage_omzet_blauw,
         grootte.label grootte,
         b.btw_nummer_1 btw_nummer,
         pubpriv.label publiek_prive,
-        'GEEN VELD IN CIVI?' nacebel,
         mt.name type_lidmaatschap,
-        m.source herkomst_lidmaatschap
+        m.source herkomst_lidmaatschap,
+        m.start_date lid_sinds
       from
         civicrm_contact c
       inner join
@@ -143,13 +142,13 @@ class BedrijfsProfielLedenDetails {
     $html .= "<tr><td>Aantal werknemers</td><td>{$dao->aantal_werknemers}</td></tr>";
     $html .= "<tr><td>Jaarlijkse omzet</td><td>{$dao->jaarlijkse_omzet}</td></tr>";
     $html .= "<tr><td>Percentage omzet 'blauw'</td><td>{$dao->percentage_omzet_blauw}</td></tr>";
-    $html .= "<tr><td>Balanstotaal</td><td>{$dao->website}</td></tr>";
+    $html .= "<tr><td>Balanstotaal</td><td>{$dao->balanstotaal}</td></tr>";
     $html .= "<tr><td>Grootte (GO, MO, KO)</td><td>{$dao->grootte}</td></tr>";
     $html .= "<tr><td>BTW nummer</td><td>{$dao->btw_nummer}</td></tr>";
     $html .= "<tr><td>Publiek of privaat</td><td>{$dao->publiek_prive}</td></tr>";
-    $html .= "<tr><td>NACEBEL code (hoofdactiviteit)</td><td>{$dao->nacebel}</td></tr>";
     $html .= "<tr><td>Type lidmaatschap</td><td>{$dao->type_lidmaatschap}</td></tr>";
     $html .= "<tr><td>Herkomst lidmaatschap</td><td>{$dao->herkomst_lidmaatschap}</td></tr>";
+    $html .= "<tr><td>Lid sinds</td><td>{$dao->lid_sinds}</td></tr>";
     $html .= '</table>';
 
     return $html;
@@ -234,7 +233,44 @@ class BedrijfsProfielLedenDetails {
   private function ContactgegevensCEO() {
     $html = '';
 
-    $html = '<p>HOE WEET IK WIE CEO IS? IS ER EEN KENMERK?</p>';
+    $sql = "
+      select
+        concat(c.first_name, ' ', c.last_name) naam
+        , c.job_title
+        , e.email
+        , tel_work.phone work_phone
+        , tel_mobile.phone mobile_phone
+      from
+        civicrm_contact c
+      inner join
+        civicrm_entity_tag et on et.entity_id = c.id and et.entity_table = 'civicrm_contact' and et.tag_id = (select t.id from civicrm_tag t where t.name = 'CEO')
+      left outer join
+        civicrm_email e on e.contact_id = c.id and e.is_primary = 1
+      left outer join
+        civicrm_phone tel_work on tel_work.contact_id = c.id and tel_work.location_type_id = 2 and tel_work.phone_type_id = 1
+      left outer join
+        civicrm_phone tel_mobile on tel_mobile.contact_id = c.id and tel_mobile.phone_type_id = 2
+      where
+        c.employer_id = %1
+      and
+        c.is_deleted = 0
+      and
+        c.is_deceased = 0
+    ";
+    $sqlParams = [
+      1 => [$this->contactID, 'Integer'],
+    ];
+    $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
+    $dao->fetch();
+
+    $html = '<table>';
+    $html .= "<tr><td>Voornaam en naam</td><td>{$dao->naam}</td></tr>";
+    $html .= "<tr><td>Functie</td><td>{$dao->job_title}</td></tr>";
+    $html .= "<tr><td>Telefoonnummer</td><td>{$dao->work_phone}</td></tr>";
+    $html .= "<tr><td>Gsm-nummer</td><td>{$dao->mobile_phone}</td></tr>";
+    $html .= "<tr><td>E-mailadres</td><td>{$dao->email}</td></tr>";
+    $html .= '</table>';
+
     return $html;
   }
 
@@ -325,7 +361,8 @@ class BedrijfsProfielLedenDetails {
       select
         filiaal.name filiaal
         , if(o.export_internationaal_actief__30=1,'Ja',if(o.export_internationaal_actief__30=0,'Nee','')) internationaal
-        , 'GEEN VELD IN CIVI?' export_landen
+        , '' huidige_export_landen
+        , '' toekomstige_export_landen
       from
         civicrm_contact c
       left outer join
@@ -348,7 +385,8 @@ class BedrijfsProfielLedenDetails {
     $html = '<table>';
     $html .= "<tr><td>Hoofdkantoor of filiaal</td><td>{$dao->filiaal}</td></tr>";
     $html .= "<tr><td>Internationaal actief?</td><td>{$dao->internationaal}</td></tr>";
-    $html .= "<tr><td>Export (Landen)</td><td>{$dao->export_landen}</td></tr>";
+    $html .= "<tr><td>Huidige exportlanden voor blauwe economie activiteiten</td><td>{$dao->huidige_export_landen}</td></tr>";
+    $html .= "<tr><td>Welke nieuwe landen staan in uw top 3 voor prospectie</td><td>{$dao->toekomstige_export_landen}</td></tr>";
     $html .= '</table>';
 
     return $html;
@@ -361,6 +399,7 @@ class BedrijfsProfielLedenDetails {
       select
         t.name
         , (select if(et.id IS NOT NULL, 'x', '') from civicrm_entity_tag et where et.tag_id = t.id and et.entity_id = %1) has_tag
+        , t.description
       from
         civicrm_tag t
       where
@@ -376,7 +415,8 @@ class BedrijfsProfielLedenDetails {
     $html = '<table>';
     while ($dao->fetch()) {
       $html .= "<tr><td>{$dao->name}</td>";
-      $html .= "<td>{$dao->has_tag}</td></tr>";
+      $html .= "<td>{$dao->has_tag}</td>";
+      $html .= "<td>{$dao->description}</td></tr>";
     }
     $html .= '</table>';
 
@@ -432,6 +472,8 @@ class BedrijfsProfielLedenDetails {
         c.employer_id = %1
       and
         c.is_deleted = 0
+      and
+        p.status_id in (1, 2)
       order by
         e.start_date desc
         , c.sort_name

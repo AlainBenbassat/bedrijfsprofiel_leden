@@ -507,6 +507,7 @@ class BedrijfsProfielLedenDetails {
         c.subject
         , ct.title
         , group_concat(org.organization_name separator ', ') partners
+        , v.label status
       from
         civicrm_case c
       inner join
@@ -517,6 +518,8 @@ class BedrijfsProfielLedenDetails {
         civicrm_relationship r on r.case_id = c.id and r.relationship_type_id = 19
       left outer join
         civicrm_contact org on org.id = r.contact_id_b
+      left outer join
+        civicrm_option_value v on v.value = c.status_id and v.option_group_id = 28
       where
         cc.contact_id = %1
       group by
@@ -531,11 +534,12 @@ class BedrijfsProfielLedenDetails {
     $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
 
     $html = '<table>';
-    $html .= "<tr><th>Type samenwerking (dossiertype)</th><th>Naam dossier</th><th>Partners</th></tr>";
+    $html .= "<tr><th>Type samenwerking (dossiertype)</th><th>Naam dossier</th><th>Partners</th><th>Status</th></tr>";
     while ($dao->fetch()) {
       $html .= "<tr><td>{$dao->title}</td>";
       $html .= "<td>{$dao->subject}</td>";
-      $html .= "<td>{$dao->partners}</td></tr>";
+      $html .= "<td>{$dao->partners}</td>";
+      $html .= "<td>{$dao->status}</td></tr>";
     }
     $html .= '</table>';
 

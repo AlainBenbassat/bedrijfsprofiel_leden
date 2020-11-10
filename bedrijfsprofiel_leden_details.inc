@@ -460,7 +460,6 @@ class BedrijfsProfielLedenDetails {
       select
         e.title
         , e.start_date
-        , concat(c.first_name, ' ', c.last_name) name
       from
         civicrm_contact c
       inner join
@@ -468,14 +467,13 @@ class BedrijfsProfielLedenDetails {
       inner join
         civicrm_event e on p.event_id = e.id
       where
-        c.employer_id = %1
+        c.id = %1
       and
         c.is_deleted = 0
       and
         p.status_id in (1, 2)
       order by
         e.start_date desc
-        , c.sort_name
     ";
     $sqlParams = [
       1 => [$this->contactID, 'Integer'],
@@ -483,11 +481,10 @@ class BedrijfsProfielLedenDetails {
     $dao = CRM_Core_DAO::executeQuery($sql, $sqlParams);
 
     $html = '<table>';
-    $html .= "<tr><th>Evenement</th><th>Evenementdatum</th><th>Naam deelnemer</th></tr>";
+    $html .= "<tr><th>Evenement</th><th>Evenementdatum</th></tr>";
     while ($dao->fetch()) {
       $html .= "<tr><td>{$dao->title}</td>";
       $html .= "<td>{$dao->start_date}</td>";
-      $html .= "<td>{$dao->name}</td></tr>";
     }
     $html .= '</table>';
 

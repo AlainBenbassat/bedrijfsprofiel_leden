@@ -459,7 +459,7 @@ class BedrijfsProfielLedenDetails {
     $sql = "
       select
         e.title
-        , e.start_date
+        , DATE_FORMAT(e.start_date, '%d-%m-%Y') start_date
       from
         civicrm_contact c
       inner join

@@ -97,9 +97,9 @@ class BedrijfsProfielLedenDetails {
         m.start_date lid_sinds
       from
         civicrm_contact c
-      inner join
+      left outer join
         civicrm_membership m on m.contact_id = c.id
-      inner join
+      left outer join
         civicrm_membership_type mt on mt.id = m.membership_type_id
       left outer join
         civicrm_address a on a.contact_id = c.id and a.is_primary = 1

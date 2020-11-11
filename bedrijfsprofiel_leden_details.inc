@@ -556,6 +556,8 @@ class BedrijfsProfielLedenDetails {
       group by
         c.subject
         , ct.title
+        , v.label
+        , corg.organization_name
       order by
         org.organization_name
     ";

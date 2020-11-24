@@ -98,7 +98,7 @@ class BedrijfsProfielLedenDetails {
       from
         civicrm_contact c
       left outer join
-        civicrm_membership m on m.contact_id = c.id
+        civicrm_membership m on m.contact_id = c.id and m.status_id in (1, 2, 3)
       left outer join
         civicrm_membership_type mt on mt.id = m.membership_type_id
       left outer join

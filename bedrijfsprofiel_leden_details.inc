@@ -552,9 +552,11 @@ class BedrijfsProfielLedenDetails {
       left outer join
         civicrm_option_value v on v.value = c.status_id and v.option_group_id = 28
       where
+        corg.is_deleted = 0
+      and (
         c.id in (select case_rels.case_id from civicrm_relationship case_rels where case_rels.contact_id_b = %1 and case_rels.relationship_type_id = 19)
       or
-        cc.contact_id = %1
+        cc.contact_id = %1)
       group by
         c.subject
         , ct.title
